@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useLazyQuery, useMutation} from '@apollo/client';
 import {Button, Header, Dropdown, Typography} from '@jahia/moonstone';
 import {useTranslation} from 'react-i18next';
-import {GetSiteLanguagesQuery} from '~/gql-queries/ExportContent.gql-queries';
+import {GetSiteLanguagesQuery} from '~/gql-queries/ExportTranslations.gql-queries';
 import {ApplyTranslationsMutation} from '~/gql-queries/ImportTranslations.gql-queries';
 
 export const ImportPanel = () => {

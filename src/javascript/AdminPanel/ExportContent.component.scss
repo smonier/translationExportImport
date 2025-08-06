@@ -38,31 +38,8 @@ $font-family: 'Roboto', sans-serif;
     border-right: 1px solid #e0e0e0;
 }
 
-.rightPanel {
-    flex: 2;
-    padding: 16px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
 .heading {
     margin-bottom: 16px;
-}
-
-.scrollableProperties {
-    flex: 1;
-    overflow-y: auto;
-    border: 1px solid #e0e0e0;
-    padding: 8px;
-    background-color: #f9f9f9;
-}
-
-.propertyItem {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
 }
 
 .customDropdown {
@@ -89,33 +66,4 @@ $font-family: 'Roboto', sans-serif;
         border-radius: 4px;
         box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
     }
-}
-
-.customInput {
-    border: 1px solid #cccccc;
-    border-radius: 4px;
-    padding: 8px;
-    background-color: #ffffff;
-    font-size: 14px;
-    color: #666666;
-    margin-bottom: 16px; /* Adds spacing at the bottom */
-    width: 100%; /* Ensures consistent sizing with the dropdown */
-}
-
-.customInput::placeholder {
-    color: #999999;
-    font-style: italic;
-}
-
-.customInput:focus {
-    outline: none;
-    border-color: #999999; /* Optional: Adds focus effect similar to dropdown */
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-}
-
-.separatorLine {
-    border: 0;
-    height: 1px;
-    background-color: #cccccc; /* Light gray color for the line */
-    margin: 8px 0; /* Space around the line */
 }
