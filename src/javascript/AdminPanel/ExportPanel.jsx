@@ -1,0 +1,438 @@
+import React, {useEffect, useState} from 'react';
+import {useLazyQuery} from '@apollo/client';
+import {GetContentTypeQuery, GetContentPropertiesQuery, FetchContentForExportQuery, GetSiteLanguagesQuery, FetchSiteInternationalizedContents} from '~/gql-queries/ExportContent.gql-queries';
+import {Button, Header, Dropdown, Typography} from '@jahia/moonstone';
+import {Dialog, DialogActions, DialogContent, DialogTitle} from '@material-ui/core';
+
+import styles from './ExportContent.component.scss';
+import {useTranslation} from 'react-i18next';
+import {exportCSVFile, exportJSONFile} from './ExportContent.utils';
+import {extractAndFormatContentTypeData} from '~/ExportContentToCsv/ExportContent.utils';
+import log from '~/log';
+
+export const ExportPanel = () => {
+    const {t} = useTranslation('translationExportImport');
+    const [selectedContentType, setSelectedContentType] = useState(null);
+    const [selectedProperties, setSelectedProperties] = useState([]);
+    const [contentTypes, setContentTypes] = useState([]);
+    const [properties, setProperties] = useState([]);
+    const [languages, setLanguages] = useState([]);
+    const [selectedLanguage, setSelectedLanguage] = useState(window.contextJsParameters.uilang);
+    const [isExporting, setIsExporting] = useState(false);
+    const [csvSeparator, setCsvSeparator] = useState(','); // State for the CSV separator
+    const [exportFormat, setExportFormat] = useState('csv');
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [previewData, setPreviewData] = useState('');
+    const [pendingExport, setPendingExport] = useState(null);
+    const [exportFilename, setExportFilename] = useState('');
+    const [exportType, setExportType] = useState('content');
+
+    const siteKey = window.contextJsParameters.siteKey;
+    const sitePath = '/sites/' + siteKey;
+    const workspace = window.contextJsParameters.workspace === 'default' ? 'EDIT' : 'LIVE';
+
+    // Fetch available languages for the site
+    const [fetchSiteLanguages, {data: languagesData}] = useLazyQuery(GetSiteLanguagesQuery, {
+        variables: {
+            workspace: workspace,
+            scope: sitePath
+        },
+        fetchPolicy: 'network-only',
+        onError: error => {
+            console.error('GetSiteLanguages error', error);
+        }
+    });
+
+    // Fetch all content types
+    const [fetchContentTypes, {data: contentTypeData, loading: contentTypeLoading}] = useLazyQuery(GetContentTypeQuery, {
+        fetchPolicy: 'network-only'
+    });
+
+    // Fetch properties of the selected content type
+    const [fetchProperties, {data: propertiesData, loading: propertiesLoading}] = useLazyQuery(GetContentPropertiesQuery, {
+        fetchPolicy: 'network-only'
+    });
+
+    // Fetch content based on the selected type and properties
+    const [fetchContentForExport] = useLazyQuery(FetchContentForExportQuery, {
+        fetchPolicy: 'network-only'
+    });
+    const [fetchSiteInternationalizedContents] = useLazyQuery(FetchSiteInternationalizedContents, {
+        fetchPolicy: 'network-only'
+    });
+
+    useEffect(() => {
+        fetchSiteLanguages();
+    }, [fetchSiteLanguages]);
+
+    useEffect(() => {
+        if (exportType === 'content') {
+            fetchContentTypes({variables: {siteKey, language: selectedLanguage}});
+        }
+    }, [fetchContentTypes, siteKey, selectedLanguage, exportType]);
+
+    useEffect(() => {
+        if (exportType === 'translations') {
+            setExportFormat('json');
+        }
+    }, [exportType]);
+
+    useEffect(() => {
+        if (contentTypeData?.jcr?.nodeTypes?.nodes) {
+            const contentTypeDataFormated = extractAndFormatContentTypeData(contentTypeData);
+
+            setContentTypes(contentTypeDataFormated);
+        }
+    }, [contentTypeData]);
+
+    useEffect(() => {
+        if (languagesData?.jcr?.nodeByPath?.languages?.values) {
+            const langs = languagesData.jcr.nodeByPath.languages.values.map(l => ({label: l, value: l}));
+            setLanguages(langs);
+        }
+    }, [languagesData]);
+    useEffect(() => {
+        if (propertiesData?.jcr?.nodeTypes?.nodes?.[0]?.properties) {
+            setProperties(propertiesData.jcr.nodeTypes.nodes[0].properties);
+        }
+    }, [propertiesData]);
+
+    const handleContentTypeChange = selectedType => {
+        setSelectedContentType(selectedType);
+        setSelectedProperties([]); // Clear selected properties when content type changes
+        fetchProperties({variables: {type: selectedType, language: selectedLanguage}});
+    };
+
+    const handlePropertyToggle = propertyName => {
+        setSelectedProperties(prev =>
+            prev.includes(propertyName) ?
+                prev.filter(prop => prop !== propertyName) :
+                [...prev, propertyName]
+        );
+    };
+
+    const notify = (type, message) => {
+        if (window?.jahia?.ui?.notify) {
+            window.jahia.ui.notify(type, null, message);
+        } else {
+            console.warn(message);
+        }
+    };
+
+    const buildTree = (rootNode, nodes) => {
+        const map = {};
+        [...nodes, rootNode].forEach(n => {
+            map[n.path] = {...n, children: []};
+        });
+        Object.values(map).forEach(n => {
+            const parentPath = n.path.substring(0, n.path.lastIndexOf('/'));
+            if (map[parentPath] && parentPath !== n.path) {
+                map[parentPath].children.push(n);
+            }
+        });
+        return map[rootNode.path];
+    };
+
+    const prepareNode = node => {
+        const formattedNode = {...node};
+
+        if (formattedNode.properties) {
+            formattedNode.properties = formattedNode.properties.reduce((acc, prop) => {
+                const val = prop.definition?.multiple ? prop.values : prop.value;
+                if (val !== undefined && val !== null && (!Array.isArray(val) || val.length > 0)) {
+                    acc[prop.name] = val;
+                }
+
+                return acc;
+            }, {});
+        }
+
+        if (formattedNode.children) {
+            formattedNode.children = formattedNode.children
+                .map(prepareNode)
+                .filter(child => child);
+        }
+
+        const hasProps = formattedNode.properties && Object.keys(formattedNode.properties).length > 0;
+        const hasChildren = formattedNode.children && formattedNode.children.length > 0;
+
+        if (!hasProps && !hasChildren) {
+            return null;
+        }
+
+        return formattedNode;
+    };
+
+    const confirmDownload = () => {
+        if (!pendingExport) {
+            return;
+        }
+
+        if (pendingExport.type === 'csv') {
+            exportCSVFile(pendingExport.data, exportFilename, pendingExport.headers, pendingExport.separator);
+            notify('success', `${exportFilename}.csv`);
+        } else {
+            exportJSONFile(pendingExport.data, exportFilename);
+            notify('success', `${exportFilename}.json`);
+        }
+
+        setIsPreviewOpen(false);
+        setPreviewData('');
+        setPendingExport(null);
+    };
+
+    const cancelPreview = () => {
+        setIsPreviewOpen(false);
+        setPreviewData('');
+        setPendingExport(null);
+    };
+
+    const handleExport = () => {
+        setIsExporting(true);
+        const timestamp = new Date().toISOString().replace(/[:.-]/g, '_');
+        const filename = `${exportType === 'translations' ? 'translations' : selectedContentType}_${timestamp}`;
+        setExportFilename(filename);
+
+        let queryPromise;
+        if (exportType === 'translations') {
+            queryPromise = fetchSiteInternationalizedContents({
+                variables: {path: sitePath, language: selectedLanguage}
+            });
+        } else {
+            queryPromise = fetchContentForExport({
+                variables: {
+                    path: sitePath,
+                    language: selectedLanguage,
+                    type: selectedContentType,
+                    workspace: workspace,
+                    properties: exportFormat === 'csv' ? selectedProperties : null
+                }
+            });
+        }
+
+        queryPromise
+            .then(response => {
+                if (exportType === 'translations') {
+                    const nodes = response.data.jcr.nodeByPath.descendants.nodes;
+                    setPendingExport({type: 'json', data: nodes});
+                    setPreviewData(JSON.stringify(nodes, null, 2));
+                    setIsPreviewOpen(true);
+                    return;
+                }
+
+                const rootNode = response.data.jcr.result;
+                const descendants = rootNode.descendants.nodes;
+
+                if (exportFormat === 'csv') {
+                    const extractedData = descendants.map(node => {
+                        const nodeData = {
+                            uuid: node.uuid,
+                            path: node.path,
+                            name: node.name,
+                            primaryNodeType: node.primaryNodeType?.name,
+                            displayName: node.displayName
+                        };
+
+                        selectedProperties.forEach(property => {
+                            const prop = node.properties.find(p => p.name === property);
+                            if (prop) {
+                                nodeData[property] = prop.definition?.multiple ? prop.values : prop.value;
+                            } else {
+                                nodeData[property] = null;
+                            }
+                        });
+
+                        nodeData['j:tagList'] = node.tagList?.[0]?.values || null;
+                        nodeData['j:defaultCategory'] = node.categoryList?.categories?.map(c => c.name) || null;
+                        nodeData.interests = node.interests?.values || null;
+
+                        return nodeData;
+                    });
+
+                    const csvHeaders = ['uuid', 'path', 'name', 'primaryNodeType', 'displayName', ...selectedProperties, 'j:tagList', 'j:defaultCategory', 'interests'];
+
+                    const csvHeaderRow = csvHeaders.join(csvSeparator);
+                    const csvRows = extractedData.map(row =>
+                        csvHeaders.map(header => `"${String(row[header] || '').replace(/"/g, '""')}"`).join(csvSeparator)
+                    );
+                    const csvContent = [csvHeaderRow, ...csvRows].join('\n');
+                    setPendingExport({type: 'csv', data: extractedData, headers: csvHeaders, separator: csvSeparator});
+                    setPreviewData(csvContent);
+                    setIsPreviewOpen(true);
+                } else {
+                    const tree = buildTree(rootNode, descendants);
+                    const processedTree = prepareNode(tree);
+                    setPendingExport({type: 'json', data: processedTree});
+                    setPreviewData(JSON.stringify(processedTree, null, 2));
+                    setIsPreviewOpen(true);
+                }
+            })
+            .catch(err => {
+                log.error('Error fetching content for export:', err);
+                notify('error', `${filename}.${exportFormat}`);
+            })
+            .finally(() => {
+                setIsExporting(false);
+            });
+    };
+
+    if (contentTypeLoading) {
+        return <div>{t('label.loadingContentTypes')}</div>;
+    }
+
+    return (
+        <>
+            <Dialog
+                open={isPreviewOpen}
+                onClose={cancelPreview}
+            >
+                <DialogTitle>{t('label.previewTitle')}</DialogTitle>
+                <DialogContent>
+                    <pre style={{maxHeight: '400px', overflow: 'auto'}}>{previewData}</pre>
+                </DialogContent>
+                <DialogActions>
+                    <Button label={t('label.previewCancel')} onClick={cancelPreview}/>
+                    <Button label={t('label.previewDownload')} color="accent" onClick={confirmDownload}/>
+                </DialogActions>
+            </Dialog>
+            <Header
+                title={t('label.header', {siteInfo: siteKey})}
+                mainActions={[
+                    <Button
+                        key="exportButton"
+                        size="big"
+                        id="exportButton"
+                        color="accent"
+                        isDisabled={(exportType === 'content' && (!selectedContentType || (exportFormat === 'csv' && selectedProperties.length === 0))) || isExporting}
+                        label={isExporting ? t('label.exporting') : (exportType === 'translations' ? t('label.exportTranslations') : (exportFormat === 'csv' ? t('label.exportToCSV') : t('label.exportToJSON')))}
+                        onClick={isExporting ? null : handleExport}
+                    />
+                ]}
+            />
+            <div className={styles.container}>
+                <div className={styles.leftPanel}>
+                    <Typography variant="heading" className={styles.heading}>
+                        {t('label.selectLanguage')}
+                    </Typography>
+                    <Dropdown
+                        data={languages}
+                        value={selectedLanguage}
+                        className={styles.customDropdown}
+                        placeholder={t('label.selectPlaceholder')}
+                        onChange={(e, item) => setSelectedLanguage(item.value)}
+                    />
+                    <Typography variant="heading" className={styles.heading}>
+                        {t('label.exportType')}
+                    </Typography>
+                    <Dropdown
+                        data={[{label: t('label.exportTypeContent'), value: 'content'}, {label: t('label.exportTypeTranslations'), value: 'translations'}]}
+                        value={exportType}
+                        className={styles.customDropdown}
+                        onChange={(e, item) => setExportType(item.value)}
+                    />
+                    {exportType === 'content' && (
+                        <>
+                            <Typography variant="heading" className={styles.heading}>
+                                {t('label.selectContentType')}
+                            </Typography>
+                            <Dropdown
+                                data={contentTypes}
+                                icon={contentTypes && contentTypes.iconStart}
+                                label={contentTypes && contentTypes.label}
+                                value={selectedContentType}
+                                className={styles.customDropdown}
+                                placeholder={t('label.selectPlaceholder')}
+                                onChange={(e, item) => handleContentTypeChange(item.value)}
+                            />
+                            <div className={styles.separatorInput}>
+                                <Typography variant="heading" className={styles.heading}>
+                                    {t('label.exportFormat')}
+                                </Typography>
+                                <Dropdown
+                                    data={[{label: 'CSV', value: 'csv'}, {label: 'JSON', value: 'json'}]}
+                                    value={exportFormat}
+                                    className={styles.customDropdown}
+                                    onChange={(e, item) => setExportFormat(item.value)}
+                                />
+                            </div>
+                            {exportFormat === 'csv' && (
+                                <div className={styles.separatorInput}>
+                                    <Typography variant="heading" className={styles.heading}>
+                                        {t('label.separator')}
+                                    </Typography>
+                                    <Dropdown
+                                        data={[
+                                            {label: ';', value: ';'},
+                                            {label: ',', value: ','},
+                                            {label: '#', value: '#'},
+                                            {label: '|', value: '|'},
+                                            {label: '/', value: '/'}
+                                        ]}
+                                        value={csvSeparator}
+                                        placeholder={t('label.separatorPlaceholder')}
+                                        className={styles.customDropdown}
+                                        onChange={(e, item) => setCsvSeparator(item.value)}
+                                    />
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+
+                {exportType === 'content' && (
+                    <div className={styles.rightPanel}>
+                        <Typography variant="heading" className={styles.heading}>
+                            {t('label.selectProperties')}
+                        </Typography>
+                        <div className={styles.scrollableProperties}>
+                            {propertiesLoading ? (
+                                <div>{t('label.loadingProperties')}</div>
+                            ) : properties.length > 0 ? (
+                                <>
+                                    {/* Select All Checkbox */}
+                                    <div className={styles.propertyItem}>
+                                        <input
+                                            type="checkbox"
+                                            id="selectAll"
+                                            checked={selectedProperties.length === properties.length}
+                                            onChange={() => {
+                                                if (selectedProperties.length === properties.length) {
+                                                    // Deselect all
+                                                    setSelectedProperties([]);
+                                                } else {
+                                                    // Select all
+                                                    setSelectedProperties(properties.map(property => property.name));
+                                                }
+                                            }}
+                                        />
+                                        <label htmlFor="selectAll">{t('label.selectAll')}</label>
+                                    </div>
+                                    <hr className={styles.separatorLine}/>
+
+                                    {/* Render Sorted Properties */}
+                                    {properties
+                                        .slice() // Create a shallow copy to avoid mutating the original array
+                                        .sort((a, b) => a.displayName.localeCompare(b.displayName)) // Sort by displayName
+                                        .map(property => (
+                                            <div key={property.name} className={styles.propertyItem}>
+                                                <input
+                                                    type="checkbox"
+                                                    id={property.name}
+                                                    checked={selectedProperties.includes(property.name)}
+                                                    onChange={() => handlePropertyToggle(property.name)}
+                                                />
+                                                <label htmlFor={property.name}>{property.displayName}</label>
+                                            </div>
+                                        ))}
+                                </>
+                            ) : (
+                                <div>{t('label.noProperties')}</div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+        </>
+    );
+};
