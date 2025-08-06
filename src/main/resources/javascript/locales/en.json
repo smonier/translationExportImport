@@ -1,6 +1,24 @@
 {
   "translationExportImport": {
-    "label" : "Translation Export Import",
-    "hello" : "Hello"
+    "label": {
+      "loadingContentTypes": "Loading content types...",
+      "previewTitle": "Preview",
+      "previewCancel": "Cancel",
+      "previewDownload": "Download",
+      "header": "Export content for {{siteInfo}}",
+      "exporting": "Exporting...",
+      "exportToCSV": "Export to CSV",
+      "exportToJSON": "Export to JSON",
+      "selectLanguage": "Select language",
+      "selectPlaceholder": "Select an option",
+      "selectContentType": "Select content type",
+      "exportFormat": "Export format",
+      "separator": "Separator",
+      "separatorPlaceholder": "Select a separator",
+      "selectProperties": "Select properties",
+      "loadingProperties": "Loading properties...",
+      "selectAll": "Select all",
+      "noProperties": "No properties available"
+    }
   }
 }
