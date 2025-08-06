@@ -1,5 +1,5 @@
 
 export default {
     ROUTE: '/translationExportImport',
-    ROUTE_DEFAULT_PATH: 'export'
+    ROUTE_DEFAULT_PATH: ''
 };

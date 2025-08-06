@@ -26,6 +26,8 @@
       "uploadFile": "Téléverser le fichier JSON",
       "importTranslations": "Importer les traductions",
       "importButton": "Importer",
+      "exportButton": "Exporter",
+      "selectAction": "Sélectionner une action",
       "importSuccess": "Traductions importées",
       "exportError": "Impossible d'exporter le contenu"
     }
