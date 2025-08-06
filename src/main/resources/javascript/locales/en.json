@@ -22,7 +22,11 @@
       "selectProperties": "Select properties",
       "loadingProperties": "Loading properties...",
       "selectAll": "Select all",
-      "noProperties": "No properties available"
+      "noProperties": "No properties available",
+      "uploadFile": "Upload JSON file",
+      "importTranslations": "Import translations",
+      "importButton": "Import",
+      "importSuccess": "Translations imported"
     }
   }
 }
