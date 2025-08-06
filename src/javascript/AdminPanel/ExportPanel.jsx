@@ -133,6 +133,44 @@ export const ExportPanel = () => {
         return map[rootNode.path];
     };
 
+    const sanitizeTranslationNodes = nodes => {
+        return nodes
+            .map(node => {
+                const {__typename, properties, primaryNodeType, ...rest} = node;
+                const sanitizedNode = {...rest};
+
+                if (primaryNodeType) {
+                    const {__typename: ptTypename, ...ptRest} = primaryNodeType;
+                    sanitizedNode.primaryNodeType = ptRest;
+                }
+
+                if (Array.isArray(properties)) {
+                    const sanitizedProps = properties
+                        .map(({__typename: propTypename, value, values, ...propRest}) => {
+                            const prop = {...propRest};
+
+                            if (value !== undefined && value !== null && value !== '') {
+                                prop.value = value;
+                            }
+
+                            if (Array.isArray(values) && values.length > 0) {
+                                prop.values = values;
+                            }
+
+                            return Object.keys(prop).length > 1 ? prop : null;
+                        })
+                        .filter(Boolean);
+
+                    if (sanitizedProps.length > 0) {
+                        sanitizedNode.properties = sanitizedProps;
+                    }
+                }
+
+                return sanitizedNode.properties ? sanitizedNode : null;
+            })
+            .filter(Boolean);
+    };
+
     const prepareNode = node => {
         const formattedNode = {...node};
 
@@ -226,8 +264,9 @@ export const ExportPanel = () => {
                         return;
                     }
 
-                    setPendingExport({type: 'json', data: nodes});
-                    setPreviewData(JSON.stringify(nodes, null, 2));
+                    const sanitized = sanitizeTranslationNodes(nodes);
+                    setPendingExport({type: 'json', data: sanitized});
+                    setPreviewData(JSON.stringify(sanitized, null, 2));
                     setIsPreviewOpen(true);
                     return;
                 }
