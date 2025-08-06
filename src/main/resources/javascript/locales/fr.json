@@ -1,5 +1,4 @@
 {
-  "translationExportImport": {
     "label": {
       "title": "Traductions Export / Import",
       "previewTitle": "Aperçu",
@@ -18,5 +17,5 @@
       "importSuccess": "Traductions importées",
       "exportError": "Impossible d'exporter les traductions"
     }
-  }
+
 }

@@ -1,5 +1,5 @@
 {
-  "translationExportImport": {
+
     "label": {
       "previewTitle": "Preview",
       "previewCancel": "Cancel",
@@ -17,5 +17,5 @@
       "importSuccess": "Translations imported",
       "exportError": "Unable to export translations"
     }
-  }
+
 }
