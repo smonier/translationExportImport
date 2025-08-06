@@ -45,6 +45,7 @@ export const ImportPanel = () => {
             setFileContent(null);
             return;
         }
+
         const reader = new FileReader();
         reader.onload = e => {
             try {
@@ -55,6 +56,7 @@ export const ImportPanel = () => {
                 setFileContent(null);
             }
         };
+
         reader.readAsText(file);
     };
 
@@ -62,15 +64,16 @@ export const ImportPanel = () => {
         if (!fileContent || !selectedLanguage) {
             return;
         }
-        for (const [uuid, props] of Object.entries(fileContent)) {
-            for (const [property, value] of Object.entries(props)) {
-                try {
-                    await applyTranslation({variables: {uuid, language: selectedLanguage, property, value}});
-                } catch (e) {
-                    console.error('Translation import error', e);
-                }
-            }
-        }
+
+        await Promise.all(
+            Object.entries(fileContent).flatMap(([uuid, props]) =>
+                Object.entries(props).map(([property, value]) =>
+                    applyTranslation({variables: {uuid, language: selectedLanguage, property, value}})
+                        .catch(e => console.error('Translation import error', e))
+                )
+            )
+        );
+
         if (window?.jahia?.ui?.notify) {
             window.jahia.ui.notify('success', null, t('label.importSuccess'));
         }
@@ -86,8 +89,8 @@ export const ImportPanel = () => {
                         size="big"
                         color="accent"
                         label={t('label.importButton')}
-                        onClick={handleImport}
                         isDisabled={!fileContent}
+                        onClick={handleImport}
                     />
                 ]}
             />

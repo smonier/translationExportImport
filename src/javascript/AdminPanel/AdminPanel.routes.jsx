@@ -8,7 +8,7 @@ export const registerRoutes = () => {
     registry.add('adminRoute', 'translationExportImport', {
         targets: ['administration-sites:10'],
         icon: <DefaultEntry/>,
-        label: 'translationExportImport:translationExportImport.label',
+        label: 'translationExportImport:translationExportImport.label.title',
         path: `${constants.ROUTE}*`, // Catch everything and let the app handle routing logic
         defaultPath: constants.ROUTE_DEFAULT_PATH,
         isSelectable: true,

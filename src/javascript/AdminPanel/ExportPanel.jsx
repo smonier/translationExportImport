@@ -7,7 +7,7 @@ import {Dialog, DialogActions, DialogContent, DialogTitle} from '@material-ui/co
 import styles from './ExportContent.component.scss';
 import {useTranslation} from 'react-i18next';
 import {exportCSVFile, exportJSONFile} from './ExportContent.utils';
-import {extractAndFormatContentTypeData} from '~/ExportContentToCsv/ExportContent.utils';
+import {extractAndFormatContentTypeData} from '~/ExportContent/ExportContent.utils';
 import log from '~/log';
 
 export const ExportPanel = () => {

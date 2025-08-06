@@ -1,11 +1,12 @@
 {
   "translationExportImport": {
     "label": {
+      "title": "Traductions Export / Import",
       "loadingContentTypes": "Chargement des types de contenu...",
       "previewTitle": "Aperçu",
       "previewCancel": "Annuler",
       "previewDownload": "Télécharger",
-      "header": "Exporter le contenu pour {{siteInfo}}",
+      "header": "Traductions Export / Import pour {{siteInfo}}",
       "exporting": "Export en cours...",
       "exportToCSV": "Exporter en CSV",
       "exportToJSON": "Exporter en JSON",

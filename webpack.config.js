@@ -18,7 +18,10 @@ module.exports = (env, argv) => {
         },
         resolve: {
             mainFields: ['module', 'main'],
-            extensions: ['.mjs', '.js', '.jsx', 'json']
+            extensions: ['.mjs', '.js', '.jsx', 'json'],
+            alias: {
+                '~': path.resolve(__dirname, './src/javascript'),
+            },
         },
         module: {
             rules: [
@@ -58,7 +61,13 @@ module.exports = (env, argv) => {
             ]
         },
         plugins: [
-            new ModuleFederationPlugin(getModuleFederationConfig(packageJson)),
+            new ModuleFederationPlugin(
+                getModuleFederationConfig(packageJson, {
+                    remotes: {
+                        '@jahia/jcontent': 'appShell.remotes.jcontent'
+                    }
+                })
+            ),
             new CleanWebpackPlugin({verbose: false}),
             new CopyWebpackPlugin({patterns:[{from: './package.json', to: ''}]})
         ],
