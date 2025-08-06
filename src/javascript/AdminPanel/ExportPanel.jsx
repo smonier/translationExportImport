@@ -228,7 +228,9 @@ export const ExportPanel = () => {
     const handleExport = () => {
         setIsExporting(true);
         const timestamp = new Date().toISOString().replace(/[:.-]/g, '_');
-        const filename = `${exportType === 'translations' ? 'translations' : selectedContentType}_${timestamp}`;
+        const filename = exportType === 'translations' ?
+            `${siteKey}_${selectedLanguage}_${timestamp}` :
+            `${selectedContentType}_${timestamp}`;
         setExportFilename(filename);
 
         let queryPromise;
