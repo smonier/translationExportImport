@@ -1,0 +1,44 @@
+.container {
+    display: flex;
+    gap: 20px;
+    margin: 20px;
+}
+
+.leftPanel {
+    flex: 1;
+    max-width: 300px;
+}
+
+.rightPanel {
+    flex: 1;
+}
+
+.heading {
+    margin-bottom: 8px;
+}
+
+.customDropdown {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.separatorInput {
+    margin-top: 16px;
+}
+
+.scrollableProperties {
+    max-height: 400px;
+    overflow: auto;
+    border: 1px solid #dedede;
+    padding: 8px;
+}
+
+.propertyItem {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.separatorLine {
+    margin: 8px 0;
+}
