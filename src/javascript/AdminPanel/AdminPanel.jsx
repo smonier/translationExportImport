@@ -10,7 +10,7 @@ import {exportCSVFile, exportJSONFile} from './ExportContent.utils';
 import {extractAndFormatContentTypeData} from '~/ExportContentToCsv/ExportContent.utils';
 import log from '~/log';
 
-export default () => {
+export const AdminPanel = () => {
     const {t} = useTranslation('translationExportImport');
     const [selectedContentType, setSelectedContentType] = useState(null);
     const [selectedProperties, setSelectedProperties] = useState([]);
@@ -103,7 +103,7 @@ export default () => {
         if (window?.jahia?.ui?.notify) {
             window.jahia.ui.notify(type, null, message);
         } else {
-            alert(message);
+            console.warn(message);
         }
     };
 
