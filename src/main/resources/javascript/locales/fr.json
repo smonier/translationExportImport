@@ -1,5 +1,4 @@
 {
-  "translationExportImport": {
     "label": {
       "title": "Traductions Export / Import",
       "loadingContentTypes": "Chargement des types de contenu...",
@@ -33,4 +32,4 @@
       "exportError": "Impossible d'exporter le contenu"
     }
   }
-}
+

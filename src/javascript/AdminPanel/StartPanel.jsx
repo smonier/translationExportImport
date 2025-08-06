@@ -15,7 +15,19 @@ export const StartPanel = ({match}) => {
     return (
         <>
             <Header title={t('label.selectAction')}/>
-            <div style={{display: 'flex', gap: '1rem'}}>
+            <div
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: '1rem'
+                }}
+            >
                 <Button
                     key="import"
                     size="big"
