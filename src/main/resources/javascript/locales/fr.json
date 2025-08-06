@@ -1,35 +1,22 @@
 {
+  "translationExportImport": {
     "label": {
       "title": "Traductions Export / Import",
-      "loadingContentTypes": "Chargement des types de contenu...",
       "previewTitle": "Aperçu",
       "previewCancel": "Annuler",
       "previewDownload": "Télécharger",
-      "header": "Traductions Export / Import pour {{siteInfo}}",
+      "header": "Exporter les traductions pour {{siteInfo}}",
       "exporting": "Export en cours...",
-      "exportToCSV": "Exporter en CSV",
-      "exportToJSON": "Exporter en JSON",
       "exportTranslations": "Exporter les traductions",
       "selectLanguage": "Sélectionner la langue",
       "selectPlaceholder": "Sélectionner une option",
-      "selectContentType": "Sélectionner un type de contenu",
-      "exportType": "Type d'export",
-      "exportTypeContent": "Contenu",
-      "exportTypeTranslations": "Traductions",
-      "exportFormat": "Format d'export",
-      "separator": "Séparateur",
-      "separatorPlaceholder": "Sélectionner un séparateur",
-      "selectProperties": "Sélectionner des propriétés",
-      "loadingProperties": "Chargement des propriétés...",
-      "selectAll": "Tout sélectionner",
-      "noProperties": "Aucune propriété disponible",
       "uploadFile": "Téléverser le fichier JSON",
       "importTranslations": "Importer les traductions",
       "importButton": "Importer",
       "exportButton": "Exporter",
       "selectAction": "Sélectionner une action",
       "importSuccess": "Traductions importées",
-      "exportError": "Impossible d'exporter le contenu"
+      "exportError": "Impossible d'exporter les traductions"
     }
   }
-
+}
