@@ -26,6 +26,8 @@
       "uploadFile": "Upload JSON file",
       "importTranslations": "Import translations",
       "importButton": "Import",
+      "exportButton": "Export",
+      "selectAction": "Select action",
       "importSuccess": "Translations imported",
       "exportError": "Unable to export content"
     }
