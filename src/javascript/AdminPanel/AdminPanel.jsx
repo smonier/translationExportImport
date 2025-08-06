@@ -121,6 +121,36 @@ export const AdminPanel = () => {
         return map[rootNode.path];
     };
 
+    const prepareNode = node => {
+        const formattedNode = {...node};
+
+        if (formattedNode.properties) {
+            formattedNode.properties = formattedNode.properties.reduce((acc, prop) => {
+                const val = prop.definition?.multiple ? prop.values : prop.value;
+                if (val !== undefined && val !== null && (!Array.isArray(val) || val.length > 0)) {
+                    acc[prop.name] = val;
+                }
+
+                return acc;
+            }, {});
+        }
+
+        if (formattedNode.children) {
+            formattedNode.children = formattedNode.children
+                .map(prepareNode)
+                .filter(child => child);
+        }
+
+        const hasProps = formattedNode.properties && Object.keys(formattedNode.properties).length > 0;
+        const hasChildren = formattedNode.children && formattedNode.children.length > 0;
+
+        if (!hasProps && !hasChildren) {
+            return null;
+        }
+
+        return formattedNode;
+    };
+
     const confirmDownload = () => {
         if (!pendingExport) {
             return;
@@ -202,8 +232,9 @@ export const AdminPanel = () => {
                     setIsPreviewOpen(true);
                 } else {
                     const tree = buildTree(rootNode, descendants);
-                    setPendingExport({type: 'json', data: tree});
-                    setPreviewData(JSON.stringify(tree, null, 2));
+                    const processedTree = prepareNode(tree);
+                    setPendingExport({type: 'json', data: processedTree});
+                    setPreviewData(JSON.stringify(processedTree, null, 2));
                     setIsPreviewOpen(true);
                 }
             })
