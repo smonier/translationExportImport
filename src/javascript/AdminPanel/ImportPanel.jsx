@@ -4,6 +4,7 @@ import {Button, Header, Dropdown, Typography} from '@jahia/moonstone';
 import {useTranslation} from 'react-i18next';
 import {GetSiteLanguagesQuery} from '~/gql-queries/ExportTranslations.gql-queries';
 import {ApplyTranslationsMutation} from '~/gql-queries/ImportTranslations.gql-queries';
+import styles from './ExportContent.component.scss';
 
 export const ImportPanel = () => {
     const {t} = useTranslation('translationExportImport');
@@ -82,7 +83,7 @@ export const ImportPanel = () => {
     return (
         <>
             <Header
-                title={t('label.importTranslations')}
+                title={t('label.header', {siteInfo: siteKey})}
                 mainActions={[
                     <Button
                         key="importButton"
@@ -94,20 +95,28 @@ export const ImportPanel = () => {
                     />
                 ]}
             />
-            <div>
-                <Typography variant="heading">
-                    {t('label.uploadFile')}
-                </Typography>
-                <input type="file" accept="application/json" onChange={handleFileChange}/>
-                <Typography variant="heading">
-                    {t('label.selectLanguage')}
-                </Typography>
-                <Dropdown
-                    data={languages}
-                    value={selectedLanguage}
-                    placeholder={t('label.selectPlaceholder')}
-                    onChange={(e, item) => setSelectedLanguage(item.value)}
-                />
+            <div className={styles.container}>
+                <div className={styles.leftPanel}>
+                    <Typography variant="heading" className={styles.heading}>
+                        {t('label.uploadFile')}
+                    </Typography>
+                    <input
+                        accept="application/json"
+                        className={styles.fileInput}
+                        type="file"
+                        onChange={handleFileChange}
+                    />
+                    <Typography variant="heading" className={styles.heading}>
+                        {t('label.selectLanguage')}
+                    </Typography>
+                    <Dropdown
+                        data={languages}
+                        value={selectedLanguage}
+                        className={styles.customDropdown}
+                        placeholder={t('label.selectPlaceholder')}
+                        onChange={(e, item) => setSelectedLanguage(item.value)}
+                    />
+                </div>
             </div>
         </>
     );
