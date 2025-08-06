@@ -212,15 +212,33 @@ export const ExportPanel = () => {
 
         queryPromise
             .then(response => {
+                if (response?.errors) {
+                    log.error('GraphQL errors fetching content for export:', response.errors);
+                    notify('error', t('label.exportError'));
+                    return;
+                }
+
                 if (exportType === 'translations') {
-                    const nodes = response.data.jcr.nodeByPath.descendants.nodes;
+                    const nodes = response?.data?.jcr?.nodeByPath?.descendants?.nodes;
+
+                    if (!nodes) {
+                        notify('error', t('label.exportError'));
+                        return;
+                    }
+
                     setPendingExport({type: 'json', data: nodes});
                     setPreviewData(JSON.stringify(nodes, null, 2));
                     setIsPreviewOpen(true);
                     return;
                 }
 
-                const rootNode = response.data.jcr.result;
+                const rootNode = response?.data?.jcr?.result;
+
+                if (!rootNode) {
+                    notify('error', t('label.exportError'));
+                    return;
+                }
+
                 const descendants = rootNode.descendants.nodes;
 
                 if (exportFormat === 'csv') {
@@ -269,7 +287,7 @@ export const ExportPanel = () => {
             })
             .catch(err => {
                 log.error('Error fetching content for export:', err);
-                notify('error', `${filename}.${exportFormat}`);
+                notify('error', t('label.exportError'));
             })
             .finally(() => {
                 setIsExporting(false);
