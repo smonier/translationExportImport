@@ -9,8 +9,8 @@ export const registerRoutes = () => {
         targets: ['administration-sites:10'],
         icon: <DefaultEntry/>,
         label: 'translationExportImport:translationExportImport.label',
-        path: `${constants.DEFAULT_ROUTE}*`, // Catch everything and let the app handle routing logic
-        defaultPath: constants.DEFAULT_ROUTE,
+        path: `${constants.ROUTE}*`, // Catch everything and let the app handle routing logic
+        defaultPath: constants.ROUTE_DEFAULT_PATH,
         isSelectable: true,
         render: v => <Suspense fallback="loading ..."><AdminPanel match={v.match}/></Suspense>
     });
