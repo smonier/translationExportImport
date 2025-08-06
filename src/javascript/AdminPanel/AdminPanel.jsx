@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {useLazyQuery} from '@apollo/client';
-import {GetContentTypeQuery, GetContentPropertiesQuery, FetchContentForExportQuery, GetSiteLanguagesQuery} from '~/gql-queries/ExportContent.gql-queries';
+import {GetContentTypeQuery, GetContentPropertiesQuery, FetchContentForExportQuery, GetSiteLanguagesQuery, FetchSiteInternationalizedContents} from '~/gql-queries/ExportContent.gql-queries';
 import {Button, Header, Dropdown, Typography} from '@jahia/moonstone';
 import {Dialog, DialogActions, DialogContent, DialogTitle} from '@material-ui/core';
 
@@ -25,6 +25,7 @@ export const AdminPanel = () => {
     const [previewData, setPreviewData] = useState('');
     const [pendingExport, setPendingExport] = useState(null);
     const [exportFilename, setExportFilename] = useState('');
+    const [exportType, setExportType] = useState('content');
 
     const siteKey = window.contextJsParameters.siteKey;
     const sitePath = '/sites/' + siteKey;
@@ -56,14 +57,25 @@ export const AdminPanel = () => {
     const [fetchContentForExport] = useLazyQuery(FetchContentForExportQuery, {
         fetchPolicy: 'network-only'
     });
+    const [fetchSiteInternationalizedContents] = useLazyQuery(FetchSiteInternationalizedContents, {
+        fetchPolicy: 'network-only'
+    });
 
     useEffect(() => {
         fetchSiteLanguages();
     }, [fetchSiteLanguages]);
 
     useEffect(() => {
-        fetchContentTypes({variables: {siteKey, language: selectedLanguage}});
-    }, [fetchContentTypes, siteKey, selectedLanguage]);
+        if (exportType === 'content') {
+            fetchContentTypes({variables: {siteKey, language: selectedLanguage}});
+        }
+    }, [fetchContentTypes, siteKey, selectedLanguage, exportType]);
+
+    useEffect(() => {
+        if (exportType === 'translations') {
+            setExportFormat('json');
+        }
+    }, [exportType]);
 
     useEffect(() => {
         if (contentTypeData?.jcr?.nodeTypes?.nodes) {
@@ -178,19 +190,36 @@ export const AdminPanel = () => {
     const handleExport = () => {
         setIsExporting(true);
         const timestamp = new Date().toISOString().replace(/[:.-]/g, '_');
-        const filename = `${selectedContentType}_${timestamp}`;
+        const filename = `${exportType === 'translations' ? 'translations' : selectedContentType}_${timestamp}`;
         setExportFilename(filename);
 
-        fetchContentForExport({
-            variables: {
-                path: sitePath,
-                language: selectedLanguage,
-                type: selectedContentType,
-                workspace: workspace,
-                properties: exportFormat === 'csv' ? selectedProperties : null
-            }
-        })
+        let queryPromise;
+        if (exportType === 'translations') {
+            queryPromise = fetchSiteInternationalizedContents({
+                variables: {path: sitePath, language: selectedLanguage}
+            });
+        } else {
+            queryPromise = fetchContentForExport({
+                variables: {
+                    path: sitePath,
+                    language: selectedLanguage,
+                    type: selectedContentType,
+                    workspace: workspace,
+                    properties: exportFormat === 'csv' ? selectedProperties : null
+                }
+            });
+        }
+
+        queryPromise
             .then(response => {
+                if (exportType === 'translations') {
+                    const nodes = response.data.jcr.nodeByPath.descendants.nodes;
+                    setPendingExport({type: 'json', data: nodes});
+                    setPreviewData(JSON.stringify(nodes, null, 2));
+                    setIsPreviewOpen(true);
+                    return;
+                }
+
                 const rootNode = response.data.jcr.result;
                 const descendants = rootNode.descendants.nodes;
 
@@ -274,8 +303,8 @@ export const AdminPanel = () => {
                         size="big"
                         id="exportButton"
                         color="accent"
-                        isDisabled={!selectedContentType || (exportFormat === 'csv' && selectedProperties.length === 0) || isExporting}
-                        label={isExporting ? t('label.exporting') : (exportFormat === 'csv' ? t('label.exportToCSV') : t('label.exportToJSON'))}
+                        isDisabled={(exportType === 'content' && (!selectedContentType || (exportFormat === 'csv' && selectedProperties.length === 0))) || isExporting}
+                        label={isExporting ? t('label.exporting') : (exportType === 'translations' ? t('label.exportTranslations') : (exportFormat === 'csv' ? t('label.exportToCSV') : t('label.exportToJSON')))}
                         onClick={isExporting ? null : handleExport}
                     />
                 ]}
@@ -293,100 +322,115 @@ export const AdminPanel = () => {
                         onChange={(e, item) => setSelectedLanguage(item.value)}
                     />
                     <Typography variant="heading" className={styles.heading}>
-                        {t('label.selectContentType')}
+                        {t('label.exportType')}
                     </Typography>
                     <Dropdown
-                        data={contentTypes}
-                        icon={contentTypes && contentTypes.iconStart}
-                        label={contentTypes && contentTypes.label}
-                        value={selectedContentType}
+                        data={[{label: t('label.exportTypeContent'), value: 'content'}, {label: t('label.exportTypeTranslations'), value: 'translations'}]}
+                        value={exportType}
                         className={styles.customDropdown}
-                        placeholder={t('label.selectPlaceholder')}
-                        onChange={(e, item) => handleContentTypeChange(item.value)}
+                        onChange={(e, item) => setExportType(item.value)}
                     />
-                    <div className={styles.separatorInput}>
-                        <Typography variant="heading" className={styles.heading}>
-                            {t('label.exportFormat')}
-                        </Typography>
-                        <Dropdown
-                            data={[{label: 'CSV', value: 'csv'}, {label: 'JSON', value: 'json'}]}
-                            value={exportFormat}
-                            className={styles.customDropdown}
-                            onChange={(e, item) => setExportFormat(item.value)}
-                        />
-                    </div>
-                    {exportFormat === 'csv' && (
-                        <div className={styles.separatorInput}>
+                    {exportType === 'content' && (
+                        <>
                             <Typography variant="heading" className={styles.heading}>
-                                {t('label.separator')}
+                                {t('label.selectContentType')}
                             </Typography>
                             <Dropdown
-                                data={[
-                                    {label: ';', value: ';'},
-                                    {label: ',', value: ','},
-                                    {label: '#', value: '#'},
-                                    {label: '|', value: '|'},
-                                    {label: '/', value: '/'}
-                                ]}
-                                value={csvSeparator}
-                                placeholder={t('label.separatorPlaceholder')}
+                                data={contentTypes}
+                                icon={contentTypes && contentTypes.iconStart}
+                                label={contentTypes && contentTypes.label}
+                                value={selectedContentType}
                                 className={styles.customDropdown}
-                                onChange={(e, item) => setCsvSeparator(item.value)}
+                                placeholder={t('label.selectPlaceholder')}
+                                onChange={(e, item) => handleContentTypeChange(item.value)}
                             />
-                        </div>
+                            <div className={styles.separatorInput}>
+                                <Typography variant="heading" className={styles.heading}>
+                                    {t('label.exportFormat')}
+                                </Typography>
+                                <Dropdown
+                                    data={[{label: 'CSV', value: 'csv'}, {label: 'JSON', value: 'json'}]}
+                                    value={exportFormat}
+                                    className={styles.customDropdown}
+                                    onChange={(e, item) => setExportFormat(item.value)}
+                                />
+                            </div>
+                            {exportFormat === 'csv' && (
+                                <div className={styles.separatorInput}>
+                                    <Typography variant="heading" className={styles.heading}>
+                                        {t('label.separator')}
+                                    </Typography>
+                                    <Dropdown
+                                        data={[
+                                            {label: ';', value: ';'},
+                                            {label: ',', value: ','},
+                                            {label: '#', value: '#'},
+                                            {label: '|', value: '|'},
+                                            {label: '/', value: '/'}
+                                        ]}
+                                        value={csvSeparator}
+                                        placeholder={t('label.separatorPlaceholder')}
+                                        className={styles.customDropdown}
+                                        onChange={(e, item) => setCsvSeparator(item.value)}
+                                    />
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
 
-                <div className={styles.rightPanel}>
-                    <Typography variant="heading" className={styles.heading}>
-                        {t('label.selectProperties')}
-                    </Typography>
-                    <div className={styles.scrollableProperties}>
-                        {propertiesLoading ? (
-                            <div>{t('label.loadingProperties')}</div>
-                        ) : properties.length > 0 ? (
-                            <>
-                                {/* Select All Checkbox */}
-                                <div className={styles.propertyItem}>
-                                    <input
-                                        type="checkbox"
-                                        id="selectAll"
-                                        checked={selectedProperties.length === properties.length}
-                                        onChange={() => {
-                                            if (selectedProperties.length === properties.length) {
-                                                // Deselect all
-                                                setSelectedProperties([]);
-                                            } else {
-                                                // Select all
-                                                setSelectedProperties(properties.map(property => property.name));
-                                            }
-                                        }}
-                                    />
-                                    <label htmlFor="selectAll">{t('label.selectAll')}</label>
-                                </div>
-                                <hr className={styles.separatorLine}/>
+                {exportType === 'content' && (
+                    <div className={styles.rightPanel}>
+                        <Typography variant="heading" className={styles.heading}>
+                            {t('label.selectProperties')}
+                        </Typography>
+                        <div className={styles.scrollableProperties}>
+                            {propertiesLoading ? (
+                                <div>{t('label.loadingProperties')}</div>
+                            ) : properties.length > 0 ? (
+                                <>
+                                    {/* Select All Checkbox */}
+                                    <div className={styles.propertyItem}>
+                                        <input
+                                            type="checkbox"
+                                            id="selectAll"
+                                            checked={selectedProperties.length === properties.length}
+                                            onChange={() => {
+                                                if (selectedProperties.length === properties.length) {
+                                                    // Deselect all
+                                                    setSelectedProperties([]);
+                                                } else {
+                                                    // Select all
+                                                    setSelectedProperties(properties.map(property => property.name));
+                                                }
+                                            }}
+                                        />
+                                        <label htmlFor="selectAll">{t('label.selectAll')}</label>
+                                    </div>
+                                    <hr className={styles.separatorLine}/>
 
-                                {/* Render Sorted Properties */}
-                                {properties
-                                    .slice() // Create a shallow copy to avoid mutating the original array
-                                    .sort((a, b) => a.displayName.localeCompare(b.displayName)) // Sort by displayName
-                                    .map(property => (
-                                        <div key={property.name} className={styles.propertyItem}>
-                                            <input
-                                                type="checkbox"
-                                                id={property.name}
-                                                checked={selectedProperties.includes(property.name)}
-                                                onChange={() => handlePropertyToggle(property.name)}
-                                            />
-                                            <label htmlFor={property.name}>{property.displayName}</label>
-                                        </div>
-                                    ))}
-                            </>
-                        ) : (
-                            <div>{t('label.noProperties')}</div>
-                        )}
+                                    {/* Render Sorted Properties */}
+                                    {properties
+                                        .slice() // Create a shallow copy to avoid mutating the original array
+                                        .sort((a, b) => a.displayName.localeCompare(b.displayName)) // Sort by displayName
+                                        .map(property => (
+                                            <div key={property.name} className={styles.propertyItem}>
+                                                <input
+                                                    type="checkbox"
+                                                    id={property.name}
+                                                    checked={selectedProperties.includes(property.name)}
+                                                    onChange={() => handlePropertyToggle(property.name)}
+                                                />
+                                                <label htmlFor={property.name}>{property.displayName}</label>
+                                            </div>
+                                        ))}
+                                </>
+                            ) : (
+                                <div>{t('label.noProperties')}</div>
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
 
         </>
