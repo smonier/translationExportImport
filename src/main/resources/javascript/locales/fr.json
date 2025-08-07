@@ -15,6 +15,7 @@
       "importTranslations": "Importer les traductions",
       "importButton": "Importer",
       "exportButton": "Exporter",
+      "backButton": "Retour",
       "selectAction": "Sélectionner une action",
       "importSuccess": "Traductions importées",
       "importReport": "{{modified}} objets modifiés",

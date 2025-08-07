@@ -1,7 +1,8 @@
 import React, {useEffect, useState, useRef} from 'react';
 import {useLazyQuery, useMutation} from '@apollo/client';
-import {Button, Header, Dropdown, Typography} from '@jahia/moonstone';
+import {Button, Header, Dropdown, Typography, ArrowLeft} from '@jahia/moonstone';
 import {useTranslation} from 'react-i18next';
+import {useHistory, useRouteMatch} from 'react-router';
 import {GetSiteLanguagesQuery} from '~/gql-queries/ExportTranslations.gql-queries';
 import {UpdateContentMutation} from '~/gql-queries/ImportTranslations.gql-queries';
 import styles from './ExportContent.component.scss';
@@ -9,6 +10,9 @@ import {LoaderOverlay} from '~/DesignSystem/LoaderOverlay';
 
 export const ImportPanel = () => {
     const {t} = useTranslation('translationExportImport');
+    const history = useHistory();
+    const match = useRouteMatch();
+    const baseUrl = match.url.split('/').slice(0, -1).join('/');
     const [fileContent, setFileContent] = useState(null);
     const [languages, setLanguages] = useState([]);
     const defaultLanguage = window.contextJsParameters.uilang;
@@ -138,6 +142,13 @@ export const ImportPanel = () => {
             )}
             <Header
                 title={t('label.headerImport', {siteInfo: siteKey})}
+                backButton={(
+                    <Button
+                        icon={<ArrowLeft/>}
+                        label={t('label.backButton')}
+                        onClick={() => history.push(baseUrl)}
+                    />
+                )}
                 mainActions={[
                     <Button
                         key="importButton"
