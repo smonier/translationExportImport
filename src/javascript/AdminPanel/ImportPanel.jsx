@@ -80,6 +80,7 @@ export const ImportPanel = () => {
 
         let modifiedCount = 0;
         let failedCount = 0;
+        const failedItems = [];
 
         /* eslint-disable no-await-in-loop */
         for (const {uuid, properties} of fileContent) {
@@ -107,14 +108,16 @@ export const ImportPanel = () => {
                 modifiedCount += 1;
             } catch (e) {
                 failedCount += 1;
-                console.error('Translation import error', e);
+                const reason = e?.message || e.toString();
+                failedItems.push({uuid, reason});
+                console.error('Translation import error', uuid, e);
             }
         }
         /* eslint-enable no-await-in-loop */
 
         setIsLoading(false);
 
-        setImportReport({modified: modifiedCount, failed: failedCount});
+        setImportReport({modified: modifiedCount, failed: failedCount, failedItems});
 
         if (window?.jahia?.ui?.notify) {
             const message = failedCount > 0 ?
@@ -183,9 +186,28 @@ export const ImportPanel = () => {
                         onChange={(e, item) => setSelectedLanguage(item.value)}
                     />
                     {importReport && (
-                        <Typography variant="body" className={styles.heading}>
-                            {t(importReport.failed > 0 ? 'label.importReportWithFails' : 'label.importReport', {modified: importReport.modified, failed: importReport.failed})}
-                        </Typography>
+                        <>
+                            <Typography variant="body" className={styles.heading}>
+                                {t(
+                                    importReport.failed > 0 ? 'label.importReportWithFails' : 'label.importReport',
+                                    {modified: importReport.modified, failed: importReport.failed}
+                                )}
+                            </Typography>
+                            {importReport.failed > 0 && (
+                                <>
+                                    <Typography variant="body" className={styles.heading}>
+                                        {t('label.importFailedItems')}
+                                    </Typography>
+                                    <ul>
+                                        {importReport.failedItems.map(item => (
+                                            <li key={item.uuid}>
+                                                <Typography variant="body">{`${item.uuid}: ${item.reason}`}</Typography>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
