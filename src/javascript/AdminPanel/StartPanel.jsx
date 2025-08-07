@@ -26,6 +26,9 @@ export const StartPanel = ({match}) => {
                     minHeight: '60vh'
                 }}
             >
+                <div style={{width: '60%', textAlign: 'center'}}>
+                    <h2>{t('label.process')}</h2>
+                </div>
                 <h3>{t('label.selectAction')}</h3>
                 <div style={{display: 'flex', gap: '1rem'}}>
                     <Button

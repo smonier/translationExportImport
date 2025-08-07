@@ -1,28 +1,29 @@
 {
-
-    "label": {
-      "previewTitle": "Preview",
-      "previewCancel": "Cancel",
-      "previewDownload": "Download",
-      "headerExport": "Export translations for {{siteInfo}}",
-      "headerImport": "Import translations for {{siteInfo}}",
-      "exporting": "Exporting...",
-      "exportTranslations": "Export translations",
-      "selectLanguage": "Select language",
-      "selectPlaceholder": "Select an option",
-      "uploadFile": "Upload JSON file",
-      "importTranslations": "Import translations",
-      "importButton": "Import",
-      "exportButton": "Export",
-      "selectAction": "Select action",
-      "importSuccess": "Translations imported",
-      "importReport": "{{modified}} objects modified",
-      "importReportWithFails": "{{modified}} objects modified, {{failed}} failed",
-      "exportError": "Unable to export translations",
-      "path": "Content path",
-      "enterPathSuffix": "Enter content path suffix",
-      "enterPathSuffixHelp": "By default, export runs on all content with internationalized properties from the site root.",
-      "selectFolder": "Select Path"
-    }
-
+  "label": {
+    "title": "Export / Import Translations for {{siteInfo}}",
+    "menu": "Export / Import Translations",
+    "previewTitle": "Preview",
+    "previewCancel": "Cancel",
+    "previewDownload": "Download",
+    "headerExport": "Export translations for {{siteInfo}}",
+    "headerImport": "Import translations for {{siteInfo}}",
+    "exporting": "Export in progress...",
+    "exportTranslations": "Export translations",
+    "selectLanguage": "Select language",
+    "selectPlaceholder": "Select an option",
+    "uploadFile": "Upload JSON file",
+    "importTranslations": "Import translations",
+    "importButton": "Import",
+    "exportButton": "Export",
+    "selectAction": "Select an action",
+    "importSuccess": "Translations imported",
+    "importReport": "{{modified}} objects modified",
+    "importReportWithFails": "{{modified}} objects modified, {{failed}} failed",
+    "exportError": "Unable to export translations",
+    "path": "Content path",
+    "enterPathSuffix": "Enter content path suffix",
+    "enterPathSuffixHelp": "By default, the export includes all content with internationalized properties starting from the site root.",
+    "selectFolder": "Select path",
+    "process": "To re-import translations, you must first export them. Edit the property values in the exported JSON file in the desired language. Then, you can import the translations."
+  }
 }

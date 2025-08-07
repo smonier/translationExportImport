@@ -1,6 +1,7 @@
 {
     "label": {
       "title": "Traductions Export / Import pour {{siteInfo}}",
+      "menu": "Traductions Export / Import",
       "previewTitle": "Aperçu",
       "previewCancel": "Annuler",
       "previewDownload": "Télécharger",
@@ -22,6 +23,7 @@
       "path": "Chemin du contenu",
       "enterPathSuffix": "Entrez le suffixe du chemin de contenu",
       "enterPathSuffixHelp": "Par défaut, l'export se fait sur tout le contenu présentant des propriétés internationalisées à partir de la racine du site.",
-      "selectFolder": "Sélectionner le chemin"
+      "selectFolder": "Sélectionner le chemin",
+      "process": "Pour re-importer les traductions, vous devez d'abord les exporter. Modifiez les valeurs des propriétés dans le fichier JSON exporté dans la langue souhaitée. Ensuite, vous pouvez importer les traductions"
     }
 }

@@ -5,6 +5,7 @@ import {useTranslation} from 'react-i18next';
 import {GetSiteLanguagesQuery} from '~/gql-queries/ExportTranslations.gql-queries';
 import {ApplyTranslationsMutation, ApplyTranslationsOnMultipleMutation} from '~/gql-queries/ImportTranslations.gql-queries';
 import styles from './ExportContent.component.scss';
+import {LoaderOverlay} from '~/DesignSystem/LoaderOverlay';
 
 export const ImportPanel = () => {
     const {t} = useTranslation('translationExportImport');
@@ -14,6 +15,7 @@ export const ImportPanel = () => {
     const [selectedLanguage, setSelectedLanguage] = useState(defaultLanguage);
     const [importReport, setImportReport] = useState(null);
     const fileInputRef = useRef();
+    const [isLoading, setIsLoading] = useState(false);
 
     const siteKey = window.contextJsParameters.siteKey;
     const sitePath = '/sites/' + siteKey;
@@ -31,6 +33,7 @@ export const ImportPanel = () => {
     });
 
     const [applyTranslation] = useMutation(ApplyTranslationsMutation);
+    const [applyMultipleTranslation] = useMutation(ApplyTranslationsOnMultipleMutation);
 
     useEffect(() => {
         fetchSiteLanguages();
@@ -70,20 +73,46 @@ export const ImportPanel = () => {
             return;
         }
 
+        setIsLoading(true);
+
         let modifiedCount = 0;
         let failedCount = 0;
 
         /* eslint-disable no-await-in-loop */
         for (const {uuid, properties} of fileContent) {
             let objectFailed = false;
-            for (const {name: property, value} of properties) {
-                const mutation = Array.isArray(value) ? ApplyTranslationsOnMultipleMutation : ApplyTranslationsMutation;
-                const variables = Array.isArray(value) ?
-                    {uuid, language: selectedLanguage, property, values: value} :
-                    {uuid, language: selectedLanguage, property, value};
+            for (const propertyObj of properties) {
+                const {name: property} = propertyObj;
+                let mutation;
+                let variables;
+
+                if (Array.isArray(propertyObj.values)) {
+                    mutation = ApplyTranslationsOnMultipleMutation;
+                    variables = {
+                        uuid,
+                        language: selectedLanguage,
+                        property,
+                        values: propertyObj.values
+                    };
+                } else if (typeof propertyObj.value === 'string') {
+                    mutation = ApplyTranslationsMutation;
+                    variables = {
+                        uuid,
+                        language: selectedLanguage,
+                        property,
+                        value: propertyObj.value
+                    };
+                } else {
+                    console.warn('Unsupported property format', propertyObj);
+                    continue;
+                }
+
+                const apply = mutation === ApplyTranslationsOnMultipleMutation ?
+                    applyMultipleTranslation :
+                    applyTranslation;
 
                 try {
-                    await applyTranslation({mutation, variables});
+                    await apply({variables});
                 } catch (e) {
                     objectFailed = true;
                     console.error('Translation import error', e);
@@ -97,6 +126,8 @@ export const ImportPanel = () => {
             }
         }
         /* eslint-enable no-await-in-loop */
+
+        setIsLoading(false);
 
         setImportReport({modified: modifiedCount, failed: failedCount});
 
@@ -117,6 +148,13 @@ export const ImportPanel = () => {
 
     return (
         <>
+            {isLoading && (
+                <div className={styles.loaderOverlay}>
+                    <div className={styles.spinner}>
+                        <LoaderOverlay status={isLoading}/>
+                    </div>
+                </div>
+            )}
             <Header
                 title={t('label.headerImport', {siteInfo: siteKey})}
                 mainActions={[
