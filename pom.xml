@@ -37,7 +37,12 @@
     <version>1.0.0</version>
     <packaging>bundle</packaging>
     <description>This is the custom ReactJS module (Content Translation Export Import) for running on a Jahia server.</description>
-
+    <scm>
+        <connection>scm:git:git@github.com:smonier/translationExportImport.git</connection>
+        <developerConnection>scm:git:git@github.com:smonier/translationExportImport.git</developerConnection>
+        <url>https://github.com/smonier/translationExportImport</url>
+        <tag>HEAD</tag>
+    </scm>
     <properties>
         <jahia-module-type>system</jahia-module-type>
         <yarn.arguments>build:production</yarn.arguments>
@@ -125,8 +130,4 @@
         </profile>
     </profiles>
 
-
-  <scm>
-    <tag>translationExportImport-1.0.0</tag>
-  </scm>
 </project>
