@@ -3,7 +3,7 @@ import {useLazyQuery, useMutation} from '@apollo/client';
 import {Button, Header, Dropdown, Typography} from '@jahia/moonstone';
 import {useTranslation} from 'react-i18next';
 import {GetSiteLanguagesQuery} from '~/gql-queries/ExportTranslations.gql-queries';
-import {ApplyTranslationsMutation, ApplyTranslationsOnMultipleMutation} from '~/gql-queries/ImportTranslations.gql-queries';
+import {UpdateContentMutation} from '~/gql-queries/ImportTranslations.gql-queries';
 import styles from './ExportContent.component.scss';
 import {LoaderOverlay} from '~/DesignSystem/LoaderOverlay';
 
@@ -32,8 +32,7 @@ export const ImportPanel = () => {
         }
     });
 
-    const [applyTranslation] = useMutation(ApplyTranslationsMutation);
-    const [applyMultipleTranslation] = useMutation(ApplyTranslationsOnMultipleMutation);
+    const [updateContent] = useMutation(UpdateContentMutation);
 
     useEffect(() => {
         fetchSiteLanguages();
@@ -80,49 +79,31 @@ export const ImportPanel = () => {
 
         /* eslint-disable no-await-in-loop */
         for (const {uuid, properties} of fileContent) {
-            let objectFailed = false;
+            const propertiesInput = [];
             for (const propertyObj of properties) {
-                const {name: property} = propertyObj;
-                let mutation;
-                let variables;
-
+                const propertyInput = {name: propertyObj.name, language: selectedLanguage};
                 if (Array.isArray(propertyObj.values)) {
-                    mutation = ApplyTranslationsOnMultipleMutation;
-                    variables = {
-                        uuid,
-                        language: selectedLanguage,
-                        property,
-                        values: propertyObj.values
-                    };
+                    propertyInput.values = propertyObj.values;
                 } else if (typeof propertyObj.value === 'string') {
-                    mutation = ApplyTranslationsMutation;
-                    variables = {
-                        uuid,
-                        language: selectedLanguage,
-                        property,
-                        value: propertyObj.value
-                    };
+                    propertyInput.value = propertyObj.value;
                 } else {
                     console.warn('Unsupported property format', propertyObj);
                     continue;
                 }
 
-                const apply = mutation === ApplyTranslationsOnMultipleMutation ?
-                    applyMultipleTranslation :
-                    applyTranslation;
-
-                try {
-                    await apply({variables});
-                } catch (e) {
-                    objectFailed = true;
-                    console.error('Translation import error', e);
-                }
+                propertiesInput.push(propertyInput);
             }
 
-            if (objectFailed) {
-                failedCount += 1;
-            } else {
+            if (propertiesInput.length === 0) {
+                continue;
+            }
+
+            try {
+                await updateContent({variables: {pathOrId: uuid, properties: propertiesInput}});
                 modifiedCount += 1;
+            } catch (e) {
+                failedCount += 1;
+                console.error('Translation import error', e);
             }
         }
         /* eslint-enable no-await-in-loop */
