@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {useLazyQuery, useMutation} from '@apollo/client';
 import {Button, Header, Dropdown, Typography} from '@jahia/moonstone';
 import {useTranslation} from 'react-i18next';
@@ -10,7 +10,10 @@ export const ImportPanel = () => {
     const {t} = useTranslation('translationExportImport');
     const [fileContent, setFileContent] = useState(null);
     const [languages, setLanguages] = useState([]);
-    const [selectedLanguage, setSelectedLanguage] = useState(window.contextJsParameters.uilang);
+    const defaultLanguage = window.contextJsParameters.uilang;
+    const [selectedLanguage, setSelectedLanguage] = useState(defaultLanguage);
+    const [importReport, setImportReport] = useState(null);
+    const fileInputRef = useRef();
 
     const siteKey = window.contextJsParameters.siteKey;
     const sitePath = '/sites/' + siteKey;
@@ -41,6 +44,7 @@ export const ImportPanel = () => {
     }, [languagesData]);
 
     const handleFileChange = event => {
+        setImportReport(null);
         const file = event.target.files[0];
         if (!file) {
             setFileContent(null);
@@ -66,25 +70,48 @@ export const ImportPanel = () => {
             return;
         }
 
-        const mutations = [];
+        let modifiedCount = 0;
+        let failedCount = 0;
 
+        /* eslint-disable no-await-in-loop */
         for (const {uuid, properties} of fileContent) {
+            let objectFailed = false;
             for (const {name: property, value} of properties) {
                 const mutation = Array.isArray(value) ? ApplyTranslationsOnMultipleMutation : ApplyTranslationsMutation;
                 const variables = Array.isArray(value) ?
                     {uuid, language: selectedLanguage, property, values: value} :
                     {uuid, language: selectedLanguage, property, value};
 
-                mutations.push(applyTranslation({mutation, variables}).catch(e =>
-                    console.error('Translation import error', e)
-                ));
+                try {
+                    await applyTranslation({mutation, variables});
+                } catch (e) {
+                    objectFailed = true;
+                    console.error('Translation import error', e);
+                }
+            }
+
+            if (objectFailed) {
+                failedCount += 1;
+            } else {
+                modifiedCount += 1;
             }
         }
+        /* eslint-enable no-await-in-loop */
 
-        await Promise.all(mutations);
+        setImportReport({modified: modifiedCount, failed: failedCount});
 
         if (window?.jahia?.ui?.notify) {
-            window.jahia.ui.notify('success', null, t('label.importSuccess'));
+            const message = failedCount > 0 ?
+                t('label.importReportWithFails', {modified: modifiedCount, failed: failedCount}) :
+                t('label.importReport', {modified: modifiedCount});
+            window.jahia.ui.notify(failedCount > 0 ? 'warning' : 'success', null, message);
+        }
+
+        // Reset form
+        setFileContent(null);
+        setSelectedLanguage(defaultLanguage);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
         }
     };
 
@@ -109,6 +136,7 @@ export const ImportPanel = () => {
                         {t('label.uploadFile')}
                     </Typography>
                     <input
+                        ref={fileInputRef}
                         accept="application/json"
                         className={styles.fileInput}
                         type="file"
@@ -124,6 +152,11 @@ export const ImportPanel = () => {
                         placeholder={t('label.selectPlaceholder')}
                         onChange={(e, item) => setSelectedLanguage(item.value)}
                     />
+                    {importReport && (
+                        <Typography variant="body" className={styles.heading}>
+                            {t(importReport.failed > 0 ? 'label.importReportWithFails' : 'label.importReport', {modified: importReport.modified, failed: importReport.failed})}
+                        </Typography>
+                    )}
                 </div>
             </div>
         </>

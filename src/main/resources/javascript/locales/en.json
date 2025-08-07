@@ -16,7 +16,13 @@
       "exportButton": "Export",
       "selectAction": "Select action",
       "importSuccess": "Translations imported",
-      "exportError": "Unable to export translations"
+      "importReport": "{{modified}} objects modified",
+      "importReportWithFails": "{{modified}} objects modified, {{failed}} failed",
+      "exportError": "Unable to export translations",
+      "path": "Content path",
+      "enterPathSuffix": "Enter content path suffix",
+      "enterPathSuffixHelp": "By default, export runs on all content with internationalized properties from the site root.",
+      "selectFolder": "Select Path"
     }
 
 }
