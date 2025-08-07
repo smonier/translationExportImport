@@ -1,15 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import {useLazyQuery} from '@apollo/client';
 import {GetSiteLanguagesQuery, FetchSiteInternationalizedContents} from '~/gql-queries/ExportTranslations.gql-queries';
-import {Button, Header, Dropdown, Typography, Input} from '@jahia/moonstone';
+import {Button, Header, Dropdown, Typography, Input, ArrowLeft} from '@jahia/moonstone';
 import {Dialog, DialogActions, DialogContent, DialogTitle} from '@material-ui/core';
 import styles from './ExportContent.component.scss';
 import {useTranslation} from 'react-i18next';
 import {exportJSONFile} from './Export.utils';
 import log from '~/log';
+import {useHistory, useRouteMatch} from 'react-router';
 
 export const ExportPanel = () => {
     const {t} = useTranslation('translationExportImport');
+    const history = useHistory();
+    const match = useRouteMatch();
+    const baseUrl = match.url.split('/').slice(0, -1).join('/');
     const [languages, setLanguages] = useState([]);
     const [selectedLanguage, setSelectedLanguage] = useState(window.contextJsParameters.uilang);
     const [isExporting, setIsExporting] = useState(false);
@@ -187,6 +191,13 @@ export const ExportPanel = () => {
             </Dialog>
             <Header
                 title={t('label.headerExport', {siteInfo: siteKey})}
+                backButton={(
+                    <Button
+                        icon={<ArrowLeft/>}
+                        label={t('label.backButton')}
+                        onClick={() => history.push(baseUrl)}
+                    />
+                )}
                 mainActions={[
                     <Button
                         key="exportButton"
