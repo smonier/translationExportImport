@@ -83,7 +83,7 @@ export const ImportPanel = () => {
     return (
         <>
             <Header
-                title={t('label.header', {siteInfo: siteKey})}
+                title={t('label.headerImport', {siteInfo: siteKey})}
                 mainActions={[
                     <Button
                         key="importButton"

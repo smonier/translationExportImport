@@ -162,7 +162,7 @@ export const ExportPanel = () => {
                 </DialogActions>
             </Dialog>
             <Header
-                title={t('label.header', {siteInfo: siteKey})}
+                title={t('label.headerExport', {siteInfo: siteKey})}
                 mainActions={[
                     <Button
                         key="exportButton"

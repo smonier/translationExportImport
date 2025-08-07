@@ -14,7 +14,7 @@ export const StartPanel = ({match}) => {
 
     return (
         <>
-            <Header title={t('label.selectAction')}/>
+            <Header title={t('label.title')}/>
             <div
                 style={{
                     position: 'absolute',
@@ -28,6 +28,7 @@ export const StartPanel = ({match}) => {
                     gap: '1rem'
                 }}
             >
+                <h3>{t('label.selectAction')}</h3>
                 <Button
                     key="import"
                     size="big"

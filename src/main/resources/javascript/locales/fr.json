@@ -1,10 +1,11 @@
 {
     "label": {
-      "title": "Traductions Export / Import",
+      "title": "Traductions Export / Import pour {{siteInfo}}",
       "previewTitle": "Aperçu",
       "previewCancel": "Annuler",
       "previewDownload": "Télécharger",
-      "header": "Exporter les traductions pour {{siteInfo}}",
+      "headerExport": "Exporter les traductions pour {{siteInfo}}",
+      "headerImport": "Importer les traductions pour {{siteInfo}}",
       "exporting": "Export en cours...",
       "exportTranslations": "Exporter les traductions",
       "selectLanguage": "Sélectionner la langue",
