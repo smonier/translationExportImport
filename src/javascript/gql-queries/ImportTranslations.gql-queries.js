@@ -11,3 +11,15 @@ export const ApplyTranslationsMutation = gql`
         }
     }
 `;
+
+export const ApplyTranslationsOnMultipleMutation = gql`
+    mutation ApplyTranslationsOnMultiple($uuid: String!, $language: String!, $property: String!, $values: [String]!) {
+        jcr {
+            mutateNode(pathOrId: $uuid) {
+                mutateProperty(name: $property) {
+                    setValues(language: $language, values: $values)
+                }
+            }
+        }
+    }
+`;

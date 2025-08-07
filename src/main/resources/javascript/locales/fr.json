@@ -16,7 +16,11 @@
       "exportButton": "Exporter",
       "selectAction": "Sélectionner une action",
       "importSuccess": "Traductions importées",
-      "exportError": "Impossible d'exporter les traductions"
+      "exportError": "Impossible d'exporter les traductions",
+      "path": "Chemin du contenu",
+      "enterPathSuffix": "Entrez le suffixe du chemin de contenu",
+      "enterPathSuffixHelp": "Par défaut, l'export se fait sur tout le contenu présentant des propriétés internationalisés à partir de la racine du site.",
+      "selectFolder": "Select. Chemin"
     }
 
 }

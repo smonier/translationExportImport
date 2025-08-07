@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useLazyQuery} from '@apollo/client';
 import {GetSiteLanguagesQuery, FetchSiteInternationalizedContents} from '~/gql-queries/ExportTranslations.gql-queries';
-import {Button, Header, Dropdown, Typography} from '@jahia/moonstone';
+import {Button, Header, Dropdown, Typography, Input} from '@jahia/moonstone';
 import {Dialog, DialogActions, DialogContent, DialogTitle} from '@material-ui/core';
 import styles from './ExportContent.component.scss';
 import {useTranslation} from 'react-i18next';
@@ -17,10 +17,12 @@ export const ExportPanel = () => {
     const [previewData, setPreviewData] = useState('');
     const [pendingExport, setPendingExport] = useState(null);
     const [exportFilename, setExportFilename] = useState('');
+    const [pathSuffix, setPathSuffix] = useState('');
 
     const siteKey = window.contextJsParameters.siteKey;
     const sitePath = '/sites/' + siteKey;
     const workspace = window.contextJsParameters.workspace === 'default' ? 'EDIT' : 'LIVE';
+    const baseContentPath = `/sites/${siteKey}`;
 
     const [fetchSiteLanguages, {data: languagesData}] = useLazyQuery(GetSiteLanguagesQuery, {
         variables: {
@@ -101,7 +103,10 @@ export const ExportPanel = () => {
         setExportFilename(filename);
 
         fetchSiteInternationalizedContents({
-            variables: {path: sitePath, language: selectedLanguage}
+            variables: {
+                path: pathSuffix ? `${sitePath}/${pathSuffix}` : sitePath,
+                language: selectedLanguage
+            }
         })
             .then(response => {
                 if (response?.errors) {
@@ -146,6 +151,25 @@ export const ExportPanel = () => {
         setPendingExport(null);
     };
 
+    // --- Folder Picker Handler ---
+    const handleOpenPathPicker = () => {
+        const initialPath = pathSuffix ? `${baseContentPath}/${pathSuffix}` : baseContentPath;
+
+        window.CE_API.openPicker({
+            type: 'editorial',
+            initialSelectedItem: [initialPath],
+            site: window.jahiaGWTParameters.siteKey,
+            lang: window.jahiaGWTParameters.uilang,
+            isMultiple: false,
+            setValue: ([selected]) => {
+                if (selected?.path) {
+                    const selectedPath = selected.path.replace(`${baseContentPath}/`, '');
+                    setPathSuffix(selectedPath);
+                }
+            }
+        });
+    };
+
     return (
         <>
             <Dialog
@@ -177,6 +201,27 @@ export const ExportPanel = () => {
             />
             <div className={styles.container}>
                 <div className={styles.leftPanel}>
+                    <Typography variant="heading" className={styles.heading}>
+                        {t('label.path')}
+                    </Typography>
+                    <div className={styles.pathContainer}>
+                        <Typography variant="body" className={styles.baseContentPath}>
+                            {sitePath}/
+                        </Typography>
+                        <Input
+                            value={pathSuffix}
+                            placeholder={t('label.enterPathSuffix')}
+                            className={styles.pathSuffixInput}
+                            onChange={e => setPathSuffix(e.target.value)}
+                        />
+                        <Button
+                            label={t('label.selectFolder')}
+                            onClick={handleOpenPathPicker}
+                        />
+                    </div>
+                    <Typography variant="body" className={`${styles.baseContentPath} ${styles.baseContentPathHelp}`}>
+                        {t('label.enterPathSuffixHelp')}
+                    </Typography>
                     <Typography variant="heading" className={styles.heading}>
                         {t('label.selectLanguage')}
                     </Typography>

@@ -3,7 +3,7 @@ import {useLazyQuery, useMutation} from '@apollo/client';
 import {Button, Header, Dropdown, Typography} from '@jahia/moonstone';
 import {useTranslation} from 'react-i18next';
 import {GetSiteLanguagesQuery} from '~/gql-queries/ExportTranslations.gql-queries';
-import {ApplyTranslationsMutation} from '~/gql-queries/ImportTranslations.gql-queries';
+import {ApplyTranslationsMutation, ApplyTranslationsOnMultipleMutation} from '~/gql-queries/ImportTranslations.gql-queries';
 import styles from './ExportContent.component.scss';
 
 export const ImportPanel = () => {
@@ -66,14 +66,22 @@ export const ImportPanel = () => {
             return;
         }
 
-        await Promise.all(
-            Object.entries(fileContent).flatMap(([uuid, props]) =>
-                Object.entries(props).map(([property, value]) =>
-                    applyTranslation({variables: {uuid, language: selectedLanguage, property, value}})
-                        .catch(e => console.error('Translation import error', e))
-                )
-            )
-        );
+        const mutations = [];
+
+        for (const {uuid, properties} of fileContent) {
+            for (const {name: property, value} of properties) {
+                const mutation = Array.isArray(value) ? ApplyTranslationsOnMultipleMutation : ApplyTranslationsMutation;
+                const variables = Array.isArray(value) ?
+                    {uuid, language: selectedLanguage, property, values: value} :
+                    {uuid, language: selectedLanguage, property, value};
+
+                mutations.push(applyTranslation({mutation, variables}).catch(e =>
+                    console.error('Translation import error', e)
+                ));
+            }
+        }
+
+        await Promise.all(mutations);
 
         if (window?.jahia?.ui?.notify) {
             window.jahia.ui.notify('success', null, t('label.importSuccess'));

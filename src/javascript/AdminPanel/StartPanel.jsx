@@ -7,44 +7,44 @@ import PropTypes from 'prop-types';
 export const StartPanel = ({match}) => {
     const {t} = useTranslation('translationExportImport');
     const history = useHistory();
+    const siteKey = window.contextJsParameters.siteKey;
 
     const goTo = path => () => {
         history.push(`${match.url}/${path}`);
     };
 
     return (
-        <>
-            <Header title={t('label.title')}/>
+        <div>
+            <Header title={t('label.title', {siteInfo: siteKey})}/>
             <div
                 style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
                     display: 'flex',
+                    flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    gap: '1rem'
+                    gap: '2rem',
+                    minHeight: '60vh'
                 }}
             >
                 <h3>{t('label.selectAction')}</h3>
-                <Button
-                    key="import"
-                    size="big"
-                    color="accent"
-                    label={t('label.importButton')}
-                    onClick={goTo('import')}
-                />
-                <Button
-                    key="export"
-                    size="big"
-                    color="accent"
-                    label={t('label.exportButton')}
-                    onClick={goTo('export')}
-                />
+                <div style={{display: 'flex', gap: '1rem'}}>
+                    <Button
+                        key="import"
+                        size="big"
+                        color="accent"
+                        label={t('label.importButton')}
+                        onClick={goTo('import')}
+                    />
+                    <Button
+                        key="export"
+                        size="big"
+                        color="accent"
+                        label={t('label.exportButton')}
+                        onClick={goTo('export')}
+                    />
+                </div>
             </div>
-        </>
+        </div>
     );
 };
 

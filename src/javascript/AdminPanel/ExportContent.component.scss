@@ -76,3 +76,46 @@ $font-family: 'Roboto', sans-serif;
     margin-bottom: 16px;
     width: 100%;
 }
+.pathInput {
+    margin-bottom: 16px;
+    width: 100%; /* Adjust width as needed */
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.pathContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between base path and input */
+    margin-bottom: 16px; /* Add spacing below the container */
+    padding: 8px; /* Optional padding for the container */
+    background-color: #f9f9f9; /* Light background for better visibility */
+    border: 1px solid #ddd; /* Subtle border to frame the path section */
+    border-radius: 4px; /* Rounded corners for a polished look */
+}
+
+.basePath {
+    color: #555; /* Slightly darker text for base path */
+    font-weight: 500; /* Make base path text stand out */
+    font-size: 14px; /* Match font size with input */
+}
+
+.pathSuffixInput {
+    flex: 1; /* Allow the input to take up available space */
+    max-width: 300px; /* Optional: Limit the maximum width of the input */
+    border: 1px solid #ccc; /* Border to distinguish the input */
+    border-radius: 4px; /* Rounded corners for the input */
+    padding: 4px 8px; /* Spacing inside the input */
+    font-size: 14px; /* Match font size with base path */
+}
+
+.pathSuffixInput:focus {
+    border-color: var(--color-accent); /* Highlight border on focus */
+    outline: none; /* Remove default outline */
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5); /* Add subtle focus effect */
+}
+.baseContentPathHelp {
+    margin-bottom: 10px; /* Adjust as needed */
+}
