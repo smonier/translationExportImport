@@ -26,6 +26,6 @@
     "enterPathSuffix": "Enter content path suffix",
     "enterPathSuffixHelp": "By default, the export includes all content with internationalized properties starting from the site root.",
     "selectFolder": "Select path",
-    "process": "To re-import translations, you must first export them. Edit the property values in the exported JSON file in the desired language. Then, you can import the translations."
+    "process": "To re-import translations, follow these steps: <br/><br/><br/>1. Export the existing translations from the site to generate a JSON file.<br/><br/>2. Edit the property values in that file in the desired language.<br/><br/>3. Import the modified file to apply the new translations."
   }
 }

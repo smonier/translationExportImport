@@ -1,6 +1,6 @@
 import React from 'react';
 import {Button, Header} from '@jahia/moonstone';
-import {useTranslation} from 'react-i18next';
+import {useTranslation, Trans} from 'react-i18next';
 import {useHistory} from 'react-router';
 import PropTypes from 'prop-types';
 
@@ -27,7 +27,10 @@ export const StartPanel = ({match}) => {
                 }}
             >
                 <div style={{width: '60%', textAlign: 'center'}}>
-                    <h2>{t('label.process')}</h2>
+                    <Trans
+                        i18nKey={t('label.process')}
+                        components={{h2: <h2/>}}
+                    />
                 </div>
                 <h3>{t('label.selectAction')}</h3>
                 <div style={{display: 'flex', gap: '1rem'}}>

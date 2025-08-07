@@ -26,6 +26,6 @@
       "enterPathSuffix": "Entrez le suffixe du chemin de contenu",
       "enterPathSuffixHelp": "Par défaut, l'export se fait sur tout le contenu présentant des propriétés internationalisées à partir de la racine du site.",
       "selectFolder": "Sélectionner le chemin",
-      "process": "Pour re-importer les traductions, vous devez d'abord les exporter. Modifiez les valeurs des propriétés dans le fichier JSON exporté dans la langue souhaitée. Ensuite, vous pouvez importer les traductions"
+      "process": "Pour re-importer des traductions, suivez ces étapes : <br/><br/><br/>1. Exportez les traductions existantes depuis le site pour obtenir un fichier JSON. <br/><br/>2. Modifiez les valeurs des propriétés dans ce fichier dans la langue souhaitée. <br/><br/>3. Importez le fichier modifié pour appliquer les nouvelles traductions."
     }
 }
