@@ -20,6 +20,7 @@
       "importSuccess": "Traductions importées",
       "importReport": "{{modified}} objets modifiés",
       "importReportWithFails": "{{modified}} objets modifiés, {{failed}} échecs",
+      "importFailedItems": "Échecs d'import :",
       "exportError": "Impossible d'exporter les traductions",
       "path": "Chemin du contenu",
       "enterPathSuffix": "Entrez le suffixe du chemin de contenu",
