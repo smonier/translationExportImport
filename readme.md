@@ -39,8 +39,8 @@ The build uses the `frontend-maven-plugin` to install Node and Yarn, install dep
 
 ## Usage
 
-1. Deploy the module and log in to Jahia as an administrator.
-2. Open the administration area and choose **Translation Export Import**.
+1. Deploy the module and log in to Jahia as an administrator and activate it.
+2. Open the Additional Panel on the desired site and choose **Export / Import Translation**.
 3. Use the start panel to pick either **Export** or **Import**.
 
 ### Exporting translations
