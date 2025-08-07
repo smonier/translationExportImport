@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from 'react';
 import {useLazyQuery, useMutation} from '@apollo/client';
-import {Button, Header, Dropdown, Typography, ArrowLeft} from '@jahia/moonstone';
+import {Button, Header, Dropdown, Typography, ArrowLeft, Input} from '@jahia/moonstone';
 import {useTranslation} from 'react-i18next';
 import {useHistory, useRouteMatch} from 'react-router';
 import {GetSiteLanguagesQuery} from '~/gql-queries/ExportTranslations.gql-queries';
@@ -165,10 +165,10 @@ export const ImportPanel = () => {
                     <Typography variant="heading" className={styles.heading}>
                         {t('label.uploadFile')}
                     </Typography>
-                    <input
+                    <Input
                         ref={fileInputRef}
                         accept="application/json"
-                        className={styles.fileInput}
+                        ClassName={styles.fileInput}
                         type="file"
                         onChange={handleFileChange}
                     />
