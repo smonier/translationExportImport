@@ -86,17 +86,19 @@ export const ImportPanel = () => {
         for (const {uuid, properties} of fileContent) {
             const propertiesInput = [];
             for (const propertyObj of properties) {
-                const propertyInput = {name: propertyObj.name, language: selectedLanguage};
-                if (Array.isArray(propertyObj.values)) {
-                    propertyInput.values = propertyObj.values;
-                } else if (typeof propertyObj.value === 'string') {
-                    propertyInput.value = propertyObj.value;
-                } else {
-                    console.warn('Unsupported property format', propertyObj);
-                    continue;
-                }
+                for (const [propName, propValue] of Object.entries(propertyObj)) {
+                    const propertyInput = {name: propName, language: selectedLanguage};
+                    if (Array.isArray(propValue)) {
+                        propertyInput.values = propValue;
+                    } else if (typeof propValue === 'string') {
+                        propertyInput.value = propValue;
+                    } else {
+                        console.warn('Unsupported property format', propertyObj);
+                        continue;
+                    }
 
-                propertiesInput.push(propertyInput);
+                    propertiesInput.push(propertyInput);
+                }
             }
 
             if (propertiesInput.length === 0) {
