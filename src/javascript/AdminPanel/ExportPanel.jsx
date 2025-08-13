@@ -79,16 +79,16 @@ export const ExportPanel = () => {
                         const hasMultipleValues = Array.isArray(values) && values.length > 0;
 
                         if (hasSingleValue) {
-                            acc.push({[name]: value});
+                            acc[name] = value;
                         } else if (hasMultipleValues) {
-                            acc.push({[name]: values});
+                            acc[name] = values;
                         }
 
                         return acc;
-                    }, []);
+                    }, {});
 
-                    if (sanitizedProps.length > 0) {
-                        sanitizedNode.properties = sanitizedProps;
+                    if (Object.keys(sanitizedProps).length > 0) {
+                        sanitizedNode.properties = [sanitizedProps];
                     }
                 }
 

@@ -57,15 +57,17 @@ The build uses the `frontend-maven-plugin` to install Node and Yarn, install dep
 
 #### JSON format
 
-The import process expects an array of objects where each object defines a node `uuid` and a list of `properties`. Each property object maps property names directly to their values. Multi-valued properties use arrays:
+The import process expects an array of objects where each object defines a node `uuid` and a list of `properties`. Each `properties` array contains a single object that maps property names directly to their values. Multi-valued properties use arrays:
 
 ```json
 [
   {
     "uuid": "xxxx-xxxx-xxxx-xxxx",
     "properties": [
-      {"jcr:title": "Hello"},
-      {"jcr:keywords": ["one", "two"]}
+      {
+        "jcr:title": "Hello",
+        "jcr:keywords": ["one", "two"]
+      }
     ]
   }
 ]
