@@ -74,21 +74,18 @@ export const ExportPanel = () => {
                 }
 
                 if (Array.isArray(properties)) {
-                    const sanitizedProps = properties
-                        .map(({__typename: propTypename, value, values, ...propRest}) => {
-                            const prop = {...propRest};
+                    const sanitizedProps = properties.reduce((acc, {__typename: _, name, value, values}) => {
+                        const hasSingleValue = value !== undefined && value !== null && value !== '';
+                        const hasMultipleValues = Array.isArray(values) && values.length > 0;
 
-                            if (value !== undefined && value !== null && value !== '') {
-                                prop.value = value;
-                            }
+                        if (hasSingleValue) {
+                            acc.push({[name]: value});
+                        } else if (hasMultipleValues) {
+                            acc.push({[name]: values});
+                        }
 
-                            if (Array.isArray(values) && values.length > 0) {
-                                prop.values = values;
-                            }
-
-                            return Object.keys(prop).length > 1 ? prop : null;
-                        })
-                        .filter(Boolean);
+                        return acc;
+                    }, []);
 
                     if (sanitizedProps.length > 0) {
                         sanitizedNode.properties = sanitizedProps;
