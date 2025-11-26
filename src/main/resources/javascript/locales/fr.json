@@ -27,5 +27,8 @@
       "enterPathSuffixHelp": "Par défaut, l'export se fait sur tout le contenu présentant des propriétés internationalisées à partir de la racine du site.",
       "selectFolder": "Sélectionner le chemin",
       "process": "Pour re-importer des traductions, suivez ces étapes : <br/><br/><br/>1. Exportez les traductions existantes depuis le site pour obtenir un fichier JSON. <br/><br/>2. Modifiez les valeurs des propriétés dans ce fichier dans la langue souhaitée. <br/><br/>3. Importez le fichier modifié pour appliquer les nouvelles traductions."
-    }
+    },
+  "accordion": {
+    "title": "Outils de contenu"
+  }
 }
