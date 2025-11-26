@@ -41,7 +41,7 @@
         <connection>scm:git:git@github.com:smonier/translationExportImport.git</connection>
         <developerConnection>scm:git:git@github.com:smonier/translationExportImport.git</developerConnection>
         <url>https://github.com/smonier/translationExportImport</url>
-        <tag>HEAD</tag>
+        <tag>translationExportImport-1.0.5</tag>
     </scm>
     <properties>
         <yarn.arguments>build:production</yarn.arguments>
