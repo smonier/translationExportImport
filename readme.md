@@ -4,7 +4,7 @@ This project is a Jahia 8 module that adds a React-based administration panel fo
 
 ## Features
 
-- Access an administration entry dedicated to translation management.
+- Access an administration entry dedicated to translation management under the **Content Tools** menu entry.
 - Export internationalised properties from any part of a site to a JSON file with a preview step and custom filename.
 - Filter exports by language and by a specific subtree of the site.
 - Import translations from a JSON file and apply them to a chosen language.
@@ -40,7 +40,7 @@ The build uses the `frontend-maven-plugin` to install Node and Yarn, install dep
 ## Usage
 
 1. Deploy the module and log in to Jahia as an administrator and activate it.
-2. Open the Additional Panel on the desired site and choose **Export / Import Translation**.
+2. Open the Additional Panel on the desired site, go to **Content Tools**, and choose **Export / Import Translation**.
 3. Use the start panel to pick either **Export** or **Import**.
 
 ### Exporting translations
